@@ -36,7 +36,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/login").permitAll()
                         .requestMatchers("/api/auth/forgot-password").permitAll()
                         .requestMatchers("/api/auth/reset-password").permitAll()
-
+                        // H2 console (dev only)
+                        .requestMatchers("/h2-console/**").permitAll()
                         // Role-based access
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/principal/**").hasRole("PRINCIPAL")
@@ -45,7 +46,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/student/**").hasRole("STUDENT")
                         // All other endpoints require auth
                         .anyRequest().authenticated())
-
+                .headers(headers -> headers
+                        .frameOptions(frame -> frame.sameOrigin())) // For H2 console
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
