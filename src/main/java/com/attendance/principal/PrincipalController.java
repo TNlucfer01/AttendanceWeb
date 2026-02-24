@@ -7,6 +7,7 @@ import com.attendance.model.User;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.NonNull;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -50,7 +51,7 @@ public class PrincipalController {
     }
 
     @GetMapping("/departments/{id}")
-    public ResponseEntity<Map<String, Object>> getDepartment(@PathVariable Long id) {
+    public ResponseEntity<Map<String, Object>> getDepartment(@PathVariable @NonNull Long id) {
         Department d = principalService.getDepartment(id);
         return ResponseEntity.ok(Map.of(
                 "id", d.getId(),
@@ -62,14 +63,15 @@ public class PrincipalController {
 
     @PutMapping("/departments/{id}")
     public ResponseEntity<Map<String, String>> updateDepartment(
-            @PathVariable Long id,
+            @PathVariable @NonNull Long id,
             @Valid @RequestBody CreateDepartmentRequest request) {
         principalService.updateDepartment(id, request);
         return ResponseEntity.ok(Map.of("message", "Department updated successfully"));
     }
 
     @PutMapping("/departments/{id}/deactivate")
-    public ResponseEntity<Map<String, String>> deactivateDepartment(@PathVariable Long id) {
+    public ResponseEntity<Map<String, String>> deactivateDepartment(
+            @PathVariable @org.springframework.lang.NonNull Long id) {
         principalService.deactivateDepartment(id);
         return ResponseEntity.ok(Map.of("message", "Department deactivated"));
     }
@@ -78,7 +80,7 @@ public class PrincipalController {
 
     @PutMapping("/departments/{id}/assign-hod")
     public ResponseEntity<Map<String, String>> assignHod(
-            @PathVariable Long id,
+            @PathVariable @NonNull Long id,
             @Valid @RequestBody AssignHodRequest request) {
         principalService.assignHod(id, request.getStaffId());
         return ResponseEntity.ok(Map.of("message", "HOD assigned successfully"));
@@ -89,6 +91,8 @@ public class PrincipalController {
             @Valid @RequestBody CreateUserRequest request,
             HttpServletRequest httpRequest) {
         Long principalId = (Long) httpRequest.getAttribute("userId");
+        if (principalId == null)
+            throw new RuntimeException("Unauthorized: Principal ID not found");
         User user = principalService.createHod(request, principalId);
         return ResponseEntity.ok(Map.of(
                 "message", "HOD account created and assigned to department",

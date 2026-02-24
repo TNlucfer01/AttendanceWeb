@@ -78,7 +78,7 @@ curl -X POST http://localhost:8080/api/auth/login \
 ```bash
 # Get current user profile
 curl http://localhost:8080/api/auth/me \
-  -H "Authorization: Bearer <token>"
+  -H "Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbkBhdHRlbmRhbmNlLmNvbSIsInVzZXJJZCI6MSwicm9sZSI6IkFETUlOIiwiaWF0IjoxNzcxODU2MTQwLCJleHAiOjE3NzE4NTc5NDB9.v97s4tM7dxSoCIjChQAP9T3At4sRwrhwmNOw5ZEZ5AF20hMdhNOG9ZV1xSsSML3JVB6i4JMT8PcUe7krwh4yRw"
 
 # Change password
 curl -X POST http://localhost:8080/api/auth/change-password \

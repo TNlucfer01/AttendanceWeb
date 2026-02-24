@@ -28,7 +28,7 @@ public class AdminService {
     }
 
     @Transactional
-    public User createPrincipal(CreatePrincipalRequest request, Long createdBy) {
+    public User createPrincipal(CreatePrincipalRequest request, @org.springframework.lang.NonNull Long createdBy) {
         // Validate: only one active Principal allowed
         if (userRepository.countByRoleAndIsActiveTrue(UserRole.PRINCIPAL) > 0) {
             throw new RuntimeException("An active Principal already exists. Deactivate the current one first.");
@@ -69,13 +69,13 @@ public class AdminService {
         return userRepository.findAll();
     }
 
-    public User getUserById(Long userId) {
+    public User getUserById(@org.springframework.lang.NonNull Long userId) {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found with ID: " + userId));
     }
 
     @Transactional
-    public void deactivateUser(Long userId) {
+    public void deactivateUser(@org.springframework.lang.NonNull Long userId) {
         User user = getUserById(userId);
 
         if (user.getRole() == UserRole.ADMIN) {
@@ -87,14 +87,14 @@ public class AdminService {
     }
 
     @Transactional
-    public void activateUser(Long userId) {
+    public void activateUser(@org.springframework.lang.NonNull Long userId) {
         User user = getUserById(userId);
         user.setIsActive(true);
         userRepository.save(user);
     }
 
     @Transactional
-    public void resetPassword(Long userId) {
+    public void resetPassword(@org.springframework.lang.NonNull Long userId) {
         User user = getUserById(userId);
         user.setPasswordHash(passwordEncoder.encode("Reset@123"));
         user.setMustChangePassword(true);

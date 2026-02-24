@@ -19,7 +19,6 @@ public class HodService {
     private final StaffRepository staffRepository;
     private final TimetableRepository timetableRepository;
     private final TimetableSlotRepository timetableSlotRepository;
-    private final DepartmentRepository departmentRepository;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
@@ -28,7 +27,6 @@ public class HodService {
             StaffRepository staffRepository,
             TimetableRepository timetableRepository,
             TimetableSlotRepository timetableSlotRepository,
-            DepartmentRepository departmentRepository,
             UserRepository userRepository,
             PasswordEncoder passwordEncoder) {
         this.classRoomRepository = classRoomRepository;
@@ -36,7 +34,6 @@ public class HodService {
         this.staffRepository = staffRepository;
         this.timetableRepository = timetableRepository;
         this.timetableSlotRepository = timetableSlotRepository;
-        this.departmentRepository = departmentRepository;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
     }
@@ -45,7 +42,7 @@ public class HodService {
     // Helper: resolve HOD's department from their user ID
     // =========================================================================
     @Transactional(readOnly = true)
-    public Department getHodDepartment(Long hodUserId) {
+    public Department getHodDepartment(@org.springframework.lang.NonNull Long hodUserId) {
         Staff staff = staffRepository.findByUserEmail(
                 userRepository.findById(hodUserId)
                         .orElseThrow(() -> new RuntimeException("User not found")).getEmail())
@@ -61,7 +58,7 @@ public class HodService {
     // =========================================================================
 
     @Transactional
-    public ClassRoom createClassRoom(CreateClassRoomRequest req, Long hodUserId) {
+    public ClassRoom createClassRoom(CreateClassRoomRequest req, @org.springframework.lang.NonNull Long hodUserId) {
         Department dept = getHodDepartment(hodUserId);
 
         if (classRoomRepository.existsByNameAndDepartmentIdAndYearAndSemester(
@@ -85,7 +82,7 @@ public class HodService {
     }
 
     @Transactional(readOnly = true)
-    public List<ClassRoom> listClassRooms(Long hodUserId) {
+    public List<ClassRoom> listClassRooms(@org.springframework.lang.NonNull Long hodUserId) {
         Department dept = getHodDepartment(hodUserId);
         List<ClassRoom> rooms = classRoomRepository.findByDepartmentId(dept.getId());
         // Force-initialize lazy associations
@@ -97,7 +94,8 @@ public class HodService {
     }
 
     @Transactional(readOnly = true)
-    public ClassRoom getClassRoom(Long classroomId, Long hodUserId) {
+    public ClassRoom getClassRoom(@org.springframework.lang.NonNull Long classroomId,
+            @org.springframework.lang.NonNull Long hodUserId) {
         Department dept = getHodDepartment(hodUserId);
         ClassRoom room = classRoomRepository.findById(classroomId)
                 .orElseThrow(() -> new RuntimeException("Classroom not found: " + classroomId));
@@ -110,7 +108,8 @@ public class HodService {
     }
 
     @Transactional
-    public ClassRoom assignAdvisor(Long classroomId, Long staffId, Long hodUserId) {
+    public ClassRoom assignAdvisor(@org.springframework.lang.NonNull Long classroomId,
+            @org.springframework.lang.NonNull Long staffId, @org.springframework.lang.NonNull Long hodUserId) {
         ClassRoom room = getClassRoom(classroomId, hodUserId);
         Staff staff = staffRepository.findById(staffId)
                 .orElseThrow(() -> new RuntimeException("Staff not found: " + staffId));
@@ -132,7 +131,8 @@ public class HodService {
     }
 
     @Transactional
-    public void archiveClassRoom(Long classroomId, Long hodUserId) {
+    public void archiveClassRoom(@org.springframework.lang.NonNull Long classroomId,
+            @org.springframework.lang.NonNull Long hodUserId) {
         ClassRoom room = getClassRoom(classroomId, hodUserId);
         room.setStatus(ClassRoomStatus.ARCHIVED);
         classRoomRepository.save(room);
@@ -143,7 +143,8 @@ public class HodService {
     // =========================================================================
 
     @Transactional
-    public Subject createSubject(Long classroomId, CreateSubjectRequest req, Long hodUserId) {
+    public Subject createSubject(@org.springframework.lang.NonNull Long classroomId, CreateSubjectRequest req,
+            @org.springframework.lang.NonNull Long hodUserId) {
         ClassRoom room = getClassRoom(classroomId, hodUserId);
 
         if (subjectRepository.existsByCodeAndClassroomId(req.getCode(), classroomId)) {
@@ -165,7 +166,8 @@ public class HodService {
     }
 
     @Transactional(readOnly = true)
-    public List<Subject> listSubjects(Long classroomId, Long hodUserId) {
+    public List<Subject> listSubjects(@org.springframework.lang.NonNull Long classroomId,
+            @org.springframework.lang.NonNull Long hodUserId) {
         getClassRoom(classroomId, hodUserId); // auth check
         List<Subject> subjects = subjectRepository.findByClassroomIdAndIsActiveTrue(classroomId);
         subjects.forEach(s -> {
@@ -176,7 +178,8 @@ public class HodService {
     }
 
     @Transactional
-    public Subject assignSubjectStaff(Long subjectId, Long staffId, Long hodUserId) {
+    public Subject assignSubjectStaff(@org.springframework.lang.NonNull Long subjectId,
+            @org.springframework.lang.NonNull Long staffId, @org.springframework.lang.NonNull Long hodUserId) {
         Department dept = getHodDepartment(hodUserId);
         Subject subject = subjectRepository.findById(subjectId)
                 .orElseThrow(() -> new RuntimeException("Subject not found: " + subjectId));
@@ -194,7 +197,8 @@ public class HodService {
     }
 
     @Transactional
-    public void deactivateSubject(Long subjectId, Long hodUserId) {
+    public void deactivateSubject(@org.springframework.lang.NonNull Long subjectId,
+            @org.springframework.lang.NonNull Long hodUserId) {
         Department dept = getHodDepartment(hodUserId);
         Subject subject = subjectRepository.findById(subjectId)
                 .orElseThrow(() -> new RuntimeException("Subject not found: " + subjectId));
@@ -210,7 +214,7 @@ public class HodService {
     // =========================================================================
 
     @Transactional
-    public User createStaff(CreateStaffRequest req, Long hodUserId) {
+    public User createStaff(CreateStaffRequest req, @org.springframework.lang.NonNull Long hodUserId) {
         Department dept = getHodDepartment(hodUserId);
 
         if (userRepository.existsByEmail(req.getEmail())) {
@@ -257,7 +261,7 @@ public class HodService {
     }
 
     @Transactional(readOnly = true)
-    public List<Staff> listDepartmentStaff(Long hodUserId) {
+    public List<Staff> listDepartmentStaff(@org.springframework.lang.NonNull Long hodUserId) {
         Department dept = getHodDepartment(hodUserId);
         List<Staff> staffList = staffRepository.findByDepartmentIdAndIsActiveTrue(dept.getId());
         staffList.forEach(s -> s.getUser().getEmail()); // init lazy
@@ -265,7 +269,8 @@ public class HodService {
     }
 
     @Transactional
-    public void deactivateStaff(Long staffId, Long hodUserId) {
+    public void deactivateStaff(@org.springframework.lang.NonNull Long staffId,
+            @org.springframework.lang.NonNull Long hodUserId) {
         Department dept = getHodDepartment(hodUserId);
         Staff staff = staffRepository.findById(staffId)
                 .orElseThrow(() -> new RuntimeException("Staff not found: " + staffId));
@@ -285,7 +290,8 @@ public class HodService {
     // =========================================================================
 
     @Transactional
-    public Timetable createTimetable(Long classroomId, Integer semester, Long hodUserId) {
+    public Timetable createTimetable(@org.springframework.lang.NonNull Long classroomId, Integer semester,
+            @org.springframework.lang.NonNull Long hodUserId) {
         ClassRoom room = getClassRoom(classroomId, hodUserId);
 
         if (timetableRepository.findByClassroomIdAndSemester(classroomId, semester).isPresent()) {
@@ -301,7 +307,8 @@ public class HodService {
     }
 
     @Transactional(readOnly = true)
-    public Timetable getTimetable(Long timetableId, Long hodUserId) {
+    public Timetable getTimetable(@org.springframework.lang.NonNull Long timetableId,
+            @org.springframework.lang.NonNull Long hodUserId) {
         Department dept = getHodDepartment(hodUserId);
         Timetable tt = timetableRepository.findById(timetableId)
                 .orElseThrow(() -> new RuntimeException("Timetable not found: " + timetableId));
@@ -312,7 +319,8 @@ public class HodService {
     }
 
     @Transactional
-    public TimetableSlot addTimetableSlot(Long timetableId, CreateTimetableSlotRequest req, Long hodUserId) {
+    public TimetableSlot addTimetableSlot(@org.springframework.lang.NonNull Long timetableId,
+            CreateTimetableSlotRequest req, @org.springframework.lang.NonNull Long hodUserId) {
         Timetable tt = getTimetable(timetableId, hodUserId);
 
         DayOfWeekEnum day = DayOfWeekEnum.valueOf(req.getDay().toUpperCase());
@@ -357,7 +365,8 @@ public class HodService {
     }
 
     @Transactional(readOnly = true)
-    public List<TimetableSlot> getTimetableSlots(Long timetableId, Long hodUserId) {
+    public List<TimetableSlot> getTimetableSlots(@org.springframework.lang.NonNull Long timetableId,
+            @org.springframework.lang.NonNull Long hodUserId) {
         getTimetable(timetableId, hodUserId); // auth check
         List<TimetableSlot> slots = timetableSlotRepository.findByTimetableId(timetableId);
         slots.forEach(s -> {
@@ -370,7 +379,8 @@ public class HodService {
     }
 
     @Transactional
-    public void deleteTimetableSlot(Long slotId, Long hodUserId) {
+    public void deleteTimetableSlot(@org.springframework.lang.NonNull Long slotId,
+            @org.springframework.lang.NonNull Long hodUserId) {
         TimetableSlot slot = timetableSlotRepository.findById(slotId)
                 .orElseThrow(() -> new RuntimeException("Slot not found: " + slotId));
         getTimetable(slot.getTimetable().getId(), hodUserId); // auth check

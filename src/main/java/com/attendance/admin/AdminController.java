@@ -6,6 +6,7 @@ import com.attendance.model.User;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.NonNull;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -27,6 +28,8 @@ public class AdminController {
             @Valid @RequestBody CreatePrincipalRequest request,
             HttpServletRequest httpRequest) {
         Long adminId = (Long) httpRequest.getAttribute("userId");
+        if (adminId == null)
+            throw new RuntimeException("Unauthorized: Admin ID not found");
         User user = adminService.createPrincipal(request, adminId);
         return ResponseEntity.ok(Map.of(
                 "message", "Principal account created successfully",
@@ -50,19 +53,19 @@ public class AdminController {
     }
 
     @PutMapping("/users/{id}/deactivate")
-    public ResponseEntity<Map<String, String>> deactivateUser(@PathVariable Long id) {
+    public ResponseEntity<Map<String, String>> deactivateUser(@PathVariable @NonNull Long id) {
         adminService.deactivateUser(id);
         return ResponseEntity.ok(Map.of("message", "User deactivated successfully"));
     }
 
     @PutMapping("/users/{id}/activate")
-    public ResponseEntity<Map<String, String>> activateUser(@PathVariable Long id) {
+    public ResponseEntity<Map<String, String>> activateUser(@PathVariable @NonNull Long id) {
         adminService.activateUser(id);
         return ResponseEntity.ok(Map.of("message", "User activated successfully"));
     }
 
     @PutMapping("/users/{id}/reset-password")
-    public ResponseEntity<Map<String, String>> resetPassword(@PathVariable Long id) {
+    public ResponseEntity<Map<String, String>> resetPassword(@PathVariable @NonNull Long id) {
         adminService.resetPassword(id);
         return ResponseEntity.ok(Map.of(
                 "message", "Password reset successfully",

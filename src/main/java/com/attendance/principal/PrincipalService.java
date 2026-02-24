@@ -1,6 +1,5 @@
 package com.attendance.principal;
 
-import com.attendance.dto.AssignHodRequest;
 import com.attendance.dto.CreateDepartmentRequest;
 import com.attendance.dto.CreateUserRequest;
 import com.attendance.dto.UpdateSystemConfigRequest;
@@ -68,7 +67,7 @@ public class PrincipalService {
     }
 
     @Transactional(readOnly = true)
-    public Department getDepartment(Long id) {
+    public Department getDepartment(@org.springframework.lang.NonNull Long id) {
         Department dept = departmentRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Department not found with ID: " + id));
         // Force-initialize HOD
@@ -79,7 +78,7 @@ public class PrincipalService {
     }
 
     @Transactional
-    public Department updateDepartment(Long id, CreateDepartmentRequest request) {
+    public Department updateDepartment(@org.springframework.lang.NonNull Long id, CreateDepartmentRequest request) {
         Department dept = getDepartment(id);
 
         // Check name uniqueness (if changed)
@@ -97,7 +96,7 @@ public class PrincipalService {
     }
 
     @Transactional
-    public void deactivateDepartment(Long id) {
+    public void deactivateDepartment(@org.springframework.lang.NonNull Long id) {
         Department dept = getDepartment(id);
         dept.setStatus(DepartmentStatus.INACTIVE);
         departmentRepository.save(dept);
@@ -106,7 +105,8 @@ public class PrincipalService {
     // === HOD Assignment ===
 
     @Transactional
-    public Department assignHod(Long departmentId, Long staffId) {
+    public Department assignHod(@org.springframework.lang.NonNull Long departmentId,
+            @org.springframework.lang.NonNull Long staffId) {
         Department dept = getDepartment(departmentId);
         Staff staff = staffRepository.findById(staffId)
                 .orElseThrow(() -> new RuntimeException("Staff not found with ID: " + staffId));
@@ -150,7 +150,7 @@ public class PrincipalService {
     // === HOD Account Creation ===
 
     @Transactional
-    public User createHod(CreateUserRequest request, Long createdBy) {
+    public User createHod(CreateUserRequest request, @org.springframework.lang.NonNull Long createdBy) {
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new RuntimeException("Email already in use: " + request.getEmail());
         }
